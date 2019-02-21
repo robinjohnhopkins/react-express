@@ -1,3 +1,9 @@
+## react express
+Follow on from plural sight course
+https://app.pluralsight.com/player?course=react-express-full-stack-app-building&author=daniel-stern
+https://github.com/danielstern/express-react-fullstack
+
+
 ## create package
 ```
 npm init --yes
@@ -17,9 +23,121 @@ run to see Hello World in browser
 ```
 npm run dev
 ```
+## add redux
+create src/server/defaultState.js
+```
+npm i --save redux@4.0.0
+```
+create src/app/store/index.js
+alter src/app/index.js to access store and console.log to see object in 'inspect'.
 
+## dashboard component
+```
+npm i --save react@16.4.2 react-dom@16.5.0 react-redux@5.0.7
+```
 
+create src/app/components/Dashboard.jsx
+```
+import React from 'react';
 
+export const Dashboard = ({groups})=>(  // <-- this round bracket indicates returning an object rather than a function
+    <div>
+        <h2>Dashboard</h2>
+    </div>
+)
+```
+then alter src/app/index.js
+```
+import {store} from './store/index'
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Dashboard } from './components/Dashboard';
+// console.log("Hello world");
+// console.log(store.getState());
+
+ReactDOM.render(
+    < Dashboard/>,
+    document.getElementById("app")
+)
+```
+
+At this point the dashboard is added to web page.
+
+create src/app/components/Main.jsx
+```
+import React from 'react';
+import { Provider } from 'react-redux';
+import {store} from '../store'
+
+export const Main = ()=>(
+    <Provider store={store}>
+        <div>
+            Dashboard goes here!
+        </div>
+    </Provider>
+)
+```
+
+then alter src/app/index.js
+
+```
+import {store} from './store/index'
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Main } from './components/Main';
+
+ReactDOM.render(
+    < Main/>,
+    document.getElementById("app")
+)
+```
+
+web page still working :)
+
+alter src/app/components/Main.jsx
+```
+import React from 'react';
+import { Provider } from 'react-redux';
+import {store} from '../store'
+import {ConnectDashboard} from './Dashboard'
+
+export const Main = ()=>(
+    <Provider store={store}>
+        <div>
+            {/*Dashboard goes here!*/}
+            <ConnectDashboard/>
+        </div>
+    </Provider>
+)
+```
+
+alter src/app/components/Dashboard.jsx
+
+```
+import React from 'react';
+import { connect } from 'react-redux'
+
+export const Dashboard = ({groups})=>(  // <-- this round bracket indicates returning an object rather than a function
+    <div>
+        <h2>Dashboard</h2>
+        {groups.map(group=>(
+            <div>
+                    {group.name}
+            </div>
+        ))}
+    </div>
+)
+
+function mapStateToProps(state) {
+    return {
+        groups:state.groups
+    }
+}
+
+export const ConnectDashboard = connect(mapStateToProps)(Dashboard);
+```
+
+At this point the dash board has an entry for each group.
 
 
 

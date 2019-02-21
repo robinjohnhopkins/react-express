@@ -1,0 +1,4 @@
+node_modules
+pdfs
+dist
+.DS_Store

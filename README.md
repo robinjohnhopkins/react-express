@@ -263,4 +263,233 @@ export const Main = ()=>(
 
 We now have links and navigation.
 
+## add button to tasks
+
+TaskList
+```
+export const TaskList =({tasks, name, id, createNewTask})=>(
+    <div>
+        <h3>
+            {name}
+        </h3>
+        <div>
+            {tasks.map(task=>(<div key={task.id} >{task.name}</div>))}
+        </div>
+        <button onClick={()=>createNewTask(id)} >Add New</button>
+    </div>
+)
+
+const mapStateToProps= (state, ownProps) => {
+    let groupID = ownProps.id;
+    return {
+        name:ownProps.name,
+        id:groupID,
+        tasks: state.tasks.filter(task=>task.group === groupID)
+    }
+};
+
+const mapDispatchToProps = (dispatch, ownProps)=>{
+    return {
+        createNewTask(id) {
+            console.log("creating new task ...", id);
+        }
+    }
+}
+export const ConnectTaskList = connect(mapStateToProps, mapDispatchToProps)(TaskList);
+```
+## add logging
+```
+npm i --save redux-logger@3.0.6 redux-saga@0.16.2
+```
+
+src/app/store/index.js
+```
+import {createStore, applyMiddleware} from 'redux';
+import {defaultState} from '../../server/defaultState';
+import { createLogger } from 'redux-logger';
+
+
+export const store = createStore(
+    function reducer(state = defaultState, action){
+        return state;
+    },
+    applyMiddleware(createLogger())
+);
+```
+
+now extra logging appears in the inspect console on click!
+```
+npm i --save uuid
+```
+
+## saga
+src/app/store/sagas.mock.js
+
+```
+import { take, put, select } from 'redux-saga/effects';
+import { delay } from 'redux-saga';
+import * as mutations from './mutations';
+import uuid from 'uuid';
+//import {  } from 'react-router'
+//import { history } from './history';
+
+/**
+ * Reducers cannot have any randomness (they must be deterministic)
+ * Since the action of creating a task involves generating a random ID, it is not pure.
+ * When the response to an action is not deterministic in a Redux application, both Sagas and Thunks are appropriate.
+ */
+export function* taskCreationSaga(){
+    while (true){
+        
+        const {groupID} = yield take(mutations.REQUEST_TASK_CREATION);
+        console.log("saga running groupID:", groupID);
+
+        // const ownerID = yield select(state=>state.session.id);
+        // const taskID = uuid();
+        // yield put(mutations.createTask(taskID, groupID, ownerID));
+    }
+}
+
+// export function* userAuthenticationSaga(){
+//     while (true){
+//         const {username,password} = yield take(mutations.REQUEST_AUTHENTICATE_USER);
+//         yield delay(250);
+//         yield put(mutations.processAuthenticateUser(mutations.AUTHENTICATED, {
+//             id:"U1",
+//             token:"ABCD-1234",
+//         }));
+
+//         history.push(`/dashboard`)
+//     }
+// }
+```
+
+src/app/store/index.js
+```
+import {createStore, applyMiddleware} from 'redux';
+import {defaultState} from '../../server/defaultState';
+import { createLogger } from 'redux-logger';
+import createSagaMiddleware from 'redux-saga';
+
+const sagaMiddleware = createSagaMiddleware();
+import * as sagas from './sagas.mock';
+
+export const store = createStore(
+    function reducer(state = defaultState, action){
+        return state;
+    },
+    applyMiddleware(createLogger(), sagaMiddleware)
+);
+
+for (let saga in sagas){
+    sagaMiddleware.run(sagas[saga]);
+}
+```
+
+now saga is triggered on each botton press.
+
+sagas.mock.js
+```
+export function* taskCreationSaga(){
+    while (true){
+        
+        const {groupID} = yield take(mutations.REQUEST_TASK_CREATION);
+        console.log("saga running groupID:", groupID);
+        const ownerID = `U1`;
+        // const ownerID = yield select(state=>state.session.id);
+        const taskID = uuid();
+        yield put(mutations.createTask(taskID, groupID, ownerID));
+    }
+}
+```
+
+store/index.js
+```
+import {createStore, applyMiddleware, combineReducers} from 'redux';
+import {defaultState} from '../../server/defaultState';
+import { createLogger } from 'redux-logger';
+import createSagaMiddleware from 'redux-saga';
+
+const sagaMiddleware = createSagaMiddleware();
+import * as sagas from './sagas.mock';
+import * as mutations from './mutations';
+
+
+export const store = createStore(
+    // function reducer(state = defaultState, action){
+    //     return state;
+    // },
+    combineReducers({
+        tasks(tasks = defaultState.tasks, action){
+            switch(action.type){
+                case mutations.CREATE_TASK:
+                    console.log(action);
+            }
+            return tasks;
+        },
+        comments(comments = defaultState.comments){
+            return comments;
+        },
+        groups(groups = defaultState.groups){
+            return groups;
+        },
+        users(users = defaultState.users){
+            return users;
+        }
+    }),
+    applyMiddleware(createLogger(), sagaMiddleware)
+);
+
+for (let saga in sagas){
+    sagaMiddleware.run(sagas[saga]);
+}
+```
+now in saga CREATE_TASK has been dispatched.
+
+sagas.mock.js
+```
+export function* taskCreationSaga(){
+    while (true){
+        
+        const {groupID} = yield take(mutations.REQUEST_TASK_CREATION);
+        console.log("saga running groupID:", groupID);
+        const ownerID = `U1`;
+        // const ownerID = yield select(state=>state.session.id);
+        const taskID = uuid();
+        yield put(mutations.createTask(taskID, groupID, ownerID));
+    }
+}
+```
+store/index.js
+```
+    combineReducers({
+        tasks(tasks = defaultState.tasks, action){
+            switch(action.type){
+                case mutations.CREATE_TASK:
+                    console.log(action);
+                    return [...tasks, {
+                        id:action.taskID,
+                        name:"New Task",
+                        group:action.groupID,
+                        owner:action.ownerID,
+                        isComplete:false
+                    }]
+            }
+            return tasks;
+        },
+```
+now REQUEST_TASK_CREATION and CREATE_TASK are seen in console log.
+```
+ action REQUEST_TASK_CREATION @ 16:05:36.252
+redux-logger.js:388  prev state {tasks: Array(6), comments: Array(1), groups: Array(3), users: Array(2)}
+redux-logger.js:392  action     {type: "REQUEST_TASK_CREATION", groupID: "G2"}
+redux-logger.js:401  next state {tasks: Array(6), comments: Array(1), groups: Array(3), users: Array(2)}
+redux-logger.js:377  action CREATE_TASK @ 16:05:36.253
+redux-logger.js:388  prev state {tasks: Array(6), comments: Array(1), groups: Array(3), users: Array(2)}
+redux-logger.js:392  action     {type: "CREATE_TASK", taskID: "55f3e651-f88d-40e4-81cd-c4458498b044", groupID: "G2", ownerID: "U1", @@redux-saga/SAGA_ACTION: true}
+redux-logger.js:401  next state {tasks: Array(7), comments: Array(1), groups: Array(3), users: Array(2)}
+```
+
+Each new task created has a unique task.id.
+But on page refresh - values do not persist.
 

@@ -191,4 +191,76 @@ export const ConnectDashboard = connect(mapStateToProps)(Dashboard);
 
 dashboard now shows tasklist.
 
+## routing and navigation
+```
+npm i --save react-router-dom@4.3.1
+```
+add
+src/app/store/history.js
+```
+import {createBrowserHistory} from 'history'
+
+export const history = createBrowserHistory();
+```
+
+alter Main
+```
+import React from 'react';
+import { Provider } from 'react-redux';
+import {store} from '../store'
+import {ConnectDashboard} from './Dashboard'
+import {Router, Route} from 'react-router-dom'
+import {history } from '../store/history'
+
+export const Main = ()=>(
+    <Router history={history}>
+        <Provider store={store}>
+            <div>
+                {/*Dashboard goes here!*/}
+                {/* <ConnectDashboard/> */}
+                <Route exact path="/dashboard" render={()=> (<ConnectDashboard/>)} />
+            </div>
+        </Provider>
+    </Router>
+)
+```
+
+now dashboard is at http://localhost:8080/dashboard
+
+add src/app/components/Navigation.jsx
+```
+import React from 'react';
+import { connect } from 'react-redux'
+import { ConnectTaskList } from './TaskList'
+import {Link} from 'react-router-dom'
+
+const Navigation = () =>(
+    <div>
+        <Link to="/dashboard">
+            <h1>
+                My Application
+            </h1>
+        </Link>
+    </div>
+);
+
+export const ConnectedNavigation = connect(state => state)(Navigation);
+```
+
+Main
+```
+import { ConnectedNavigation } from './Navigation'
+
+export const Main = ()=>(
+    <Router history={history}>
+        <Provider store={store}>
+            <div>
+                <ConnectedNavigation />
+                {/*Dashboard goes here!*/}
+                {/* <ConnectDashboard/> */}
+                <Route exact path="/dashboard" render={()=> (<ConnectDashboard/>)} />
+```
+
+We now have links and navigation.
+
 

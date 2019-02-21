@@ -139,5 +139,52 @@ export const ConnectDashboard = connect(mapStateToProps)(Dashboard);
 
 At this point the dash board has an entry for each group.
 
+add src/app/components/TaskList.jsx
+```
+import React from 'react';
+import { connect } from 'react-redux'
+
+export const TaskList =({tasks})=>(
+    <div>
+        {tasks.map(task=>(<div>{task.name}</div>))}
+    </div>
+)
+
+const mapStateToProps= (state, ownProps) => {
+    let groupID = ownProps.id;
+    return {
+        name:ownProps.name,
+        id:groupID,
+        tasks: state.tasks.filter(task=>task.group === groupID)
+    }
+};
+
+export const ConnectTaskList = connect(mapStateToProps)(TaskList);
+```
+wire up by altering Dashboard
+```
+import React from 'react';
+import { connect } from 'react-redux'
+import { ConnectTaskList } from './TaskList'
+
+export const Dashboard = ({groups})=>(  // <-- this round bracket indicates returning an object rather than a function
+    <div>
+        <h2>Dashboard</h2>
+        {groups.map(group=>(
+            <ConnectTaskList id={group.id} name={group.name}></ConnectTaskList>
+        ))}
+    </div>
+)
+
+function mapStateToProps(state) {
+    return {
+        groups:state.groups
+    }
+}
+
+export const ConnectDashboard = connect(mapStateToProps)(Dashboard);
+```
+
+dashboard now shows tasklist.
 
 

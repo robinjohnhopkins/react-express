@@ -109,7 +109,7 @@ function mapStateToProps(state,ownProps){
         comments,
         isOwner,
         sessionID: null, //state.session.id,
-        isComplete: task.isComplete,
+        isComplete: false, //task.isComplete,
         groups
     }
 }

@@ -493,3 +493,259 @@ redux-logger.js:401  next state {tasks: Array(7), comments: Array(1), groups: Ar
 Each new task created has a unique task.id.
 But on page refresh - values do not persist.
 
+## Task details route
+
+src/app/components/Main.jsx
+```
+import { ConnectedTaskDetail } from './TaskDetail'
+
+export const Main = ()=>(
+    <Router history={history}>
+        <Provider store={store}>
+            <div>
+                <ConnectedNavigation />
+                {/*Dashboard goes here!*/}
+                {/* <ConnectDashboard/> */}
+                <Route exact path="/dashboard" render={()=> (<ConnectDashboard/>)} />
+                <Route exact path="/task/:id" render={({match})=> (<ConnectedTaskDetail match={match} />)} />
+            </div>
+        </Provider>
+    </Router>
+)
+```
+
+src/app/components/TaskDetail.jsx
+```
+/**
+ * The task detail component route is a more sophisticated form that has many different fields.
+ * The component automatically calls the REST API [via a mutation] to update the server on every change.
+ */
+import React from 'react';
+import uuid from 'uuid';
+import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
+import * as mutations from '../store/mutations'
+
+//import { ConnectedUsernameDisplay } from './UsernameDisplay'
+
+import {
+    setTaskCompletion,
+    addTaskComment,
+    setTaskGroup,
+    setTaskName
+} from '../store/mutations'
+
+const TaskDetail = ({
+    id,
+    comments,
+    task,
+    isOwner,
+    isComplete,
+    sessionID,
+    groups,
+
+    setTaskCompletion,
+    addTaskComment,
+    setTaskGroup,
+    setTaskName
+})=>{
+    return (
+        <div className="card p-3 col-6">
+        Task Detail
+            {isOwner ?
+                <div>
+                    <input type="text" value={task.name} onChange={setTaskName} className="form-control form-control-lg"/>
+                </div>
+                    :
+                <h3>
+                    {task.name} {isComplete ? `✓` : null}
+                </h3>
+            }
+
+            <div className="mt-3">
+                {isOwner ?
+                    <div>
+                        <div>
+                            You are the owner of this task.
+                            <button  className="btn btn-primary ml-2" onClick={() => setTaskCompletion(id,!isComplete)}>
+                                {isComplete ? `Reopen` : `Complete`} This Task
+                            </button>
+                        </div>
+                    </div>
+                    :
+                    <div>
+                        <ConnectedUsernameDisplay id={task.owner}/> is the owner of this task.
+                    </div>}
+            </div>
+            {/* <div className="mt-2">
+                {comments.map(comment=>(
+                    <div key={comment.id}>
+                        <ConnectedUsernameDisplay id={comment.owner}/> : {comment.content}
+                    </div>
+                ))}
+            </div> */}
+
+            <form className="form-inline">
+                <span className="mr-4">
+                    Change Group
+                </span>
+                <select onChange={setTaskGroup} value={task.group} className="form-control">
+                    {groups.map(group=>(
+                        <option key={group.id} value={group.id}>
+                            {group.name}
+                        </option>
+                    ))}
+                </select>
+            </form>
+
+            {/* <form className="form-inline" onSubmit={(e)=>addTaskComment(id,sessionID,e)}>
+                <input type="text" name="commentContents" autoComplete="off" placeholder="Add a comment" className="form-control"/>
+                <button type="submit" className="btn">Submit</button>
+            </form> */}
+
+            <div>
+            <Link to="/dashboard">
+                <button className="btn btn-primary mt-2">
+                    Done
+                </button>
+            </Link>
+            </div>
+        </div>
+    )
+}
+
+function mapStateToProps(state,ownProps){
+    let id = ownProps.match.params.id;
+    let task = state.tasks.find(task=>task.id === id);
+    let comments = state.comments.filter(comment=>comment.task === id);
+    let isOwner = true; //state.session.id === task.owner;
+    let groups = state.groups;
+
+    return {
+        id,
+        task,
+        comments,
+        isOwner,
+        sessionID: null, //state.session.id,
+        isComplete: task.isComplete,
+        groups
+    }
+}
+
+function mapDispatchToProps(dispatch, ownProps){
+    let id = ownProps.match.params.id;
+    return {
+        setTaskCompletion(id,isComplete){
+            dispatch(setTaskCompletion(id,isComplete));
+        },
+        setTaskGroup(e){
+            dispatch(setTaskGroup(id,e.target.value));
+        },
+        setTaskName(e){
+            dispatch(setTaskName(id,e.target.value));
+        },
+        addTaskComment(taskID, ownerID, e) {
+            let input = e.target[`commentContents`];
+            let commentID = uuid();
+            let content = input.value;
+            e.preventDefault();
+            if (content !== ``) {
+                input.value = ``;
+                dispatch(addTaskComment(commentID, taskID, ownerID, content));
+            }
+        }
+    }
+}
+
+export const ConnectedTaskDetail = connect(mapStateToProps,mapDispatchToProps)(TaskDetail);
+```
+src/app/components/TaskList.jsx
+```
+import { Link } from 'react-router-dom'
+
+export const TaskList =({tasks, name, id, createNewTask})=>(
+    <div>
+        <h3>
+            {name}
+        </h3>
+        <div>
+            {tasks.map(task=>(
+                <Link to={`/task/${task.id}`} key={task.id} >
+                    <div key={task.id} >{task.name}</div>
+                </Link>
+```
+
+src/app/store/index.js
+```
+                case mutations.SET_TASK_COMPLETE:
+                    return tasks.map(task=>{
+                        return (task.id === action.taskID) ?
+                            {...task, isComplete:action.isComplete} :
+                            task;
+                    });
+                case mutations.SET_TASK_NAME:
+                    return tasks.map(task=>{
+                        return (task.id === action.taskID) ?
+                            {...task, name:action.name} :
+                            task;
+                    });
+                case mutations.SET_TASK_GROUP:
+                    return tasks.map(task=>{
+                        return (task.id === action.taskID) ?
+                            {...task, group:action.groupID} :
+                            task;
+                    });
+```
+src/app/store/mutations.js
+```
+export const SET_TASK_COMPLETE = `SET_TASK_COMPLETE`;
+export const SET_TASK_GROUP = `SET_TASK_GROUP`;
+export const SET_TASK_NAME = `SET_TASK_NAME`;
+export const ADD_TASK_COMMENT = `ADD_TASK_COMMENT`;
+export const REQUEST_TASK_CREATION = `REQUEST_TASK_CREATION`;
+export const CREATE_TASK = `CREATE_TASK`;
+
+export const setTaskCompletion = (id, isComplete = true)=>({
+    type:SET_TASK_COMPLETE,
+    taskID:id,
+    isComplete
+});
+
+export const addTaskComment = (commentID, taskID, ownerID, content)=>({
+    type:ADD_TASK_COMMENT,
+    id:commentID,
+    task: taskID,
+    owner: ownerID,
+    content
+});
+
+export const requestTaskCreation = (groupID)=>({
+    type:REQUEST_TASK_CREATION,
+    groupID
+});
+export const createTask = (taskID, groupID, ownerID)=>({
+    type:CREATE_TASK,
+    taskID,
+    groupID,
+    ownerID
+});
+export const setTaskGroup = (taskID, groupID)=>({
+    type:SET_TASK_GROUP,
+    taskID,
+    groupID
+});
+
+export const setTaskName = (taskID, name)=>({
+    type:SET_TASK_NAME,
+    taskID,
+    name
+});
+```
+
+ui for task details now updates a bit
+the focus will change to server
+to add mongo and persistence with a REST api
+later to come back to gui.
+
+
+

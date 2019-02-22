@@ -747,5 +747,94 @@ the focus will change to server
 to add mongo and persistence with a REST api
 later to come back to gui.
 
+## mongo
 
+brew services list
+brew install mongodb
+brew services start mongodb
+
+```
+npm i --save-dev mongodb@3.1.10
+```
+src/server/connect-db.js
+```
+import { MongoClient } from 'mongodb';
+const url = `mongodb://localhost:27017/myorganiser`;
+let db = null;
+
+export async function connectDB(){
+    if (db) return db;
+    let client = await MongoClient.connect(url, {useNewUrlParser: true});
+    db = client.db();
+    console.info("Got DB,", db);
+    return db;
+}
+```
+src/server/initialize-db.js
+```
+import { defaultState } from './defaultState';
+import {connectDB}  from './connect-db';
+
+async function initializeDB(){
+    let db = await connectDB();
+    for (let collectionName in defaultState){
+        let collection = db.collection(collectionName);
+        await collection.insertMany(defaultState[collectionName]);
+    }
+}
+
+initializeDB();
+```
+package.json
+```
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack",
+    "dev": "webpack-dev-server --open",
+    "initialize":"babel-node src/server/initialize-db"
+  },
+```
+Now run the following to populate a db in mongo
+```
+npm run initialize
+```
+Install Robo 3T (formerly robomongo).
+Run/refresh
+myorganiser db is created
+double click on tasks to see records.
+nice.
+
+## server
+```
+npm i --save-dev express@4.16.3 cors@2.8.4 body-parser@1.18.3
+```
+
+src/server/server.js
+```
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+
+let port = 7777;
+let app = express();
+
+app.listen(port, console.log("server listening on port", port));
+
+app.get('/', (req,res)=>{
+    res.send("Hello world");
+});
+```
+package.json
+```
+    "server": "babel-node src/server/server"
+```
+run server:
+```
+npm run server
+```
+in browser:     http://localhost:7777/
+
+You should see Hello world.
+
+## server part 2
 

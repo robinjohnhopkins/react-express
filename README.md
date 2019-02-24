@@ -836,5 +836,193 @@ in browser:     http://localhost:7777/
 
 You should see Hello world.
 
-## server part 2
+## server part 2 - addNewTask
+
+src/server/server.js
+```
+// app.get('/', (req,res)=>{
+//     res.send("Hello world");
+// });
+
+app.use(
+    cors(),
+    bodyParser.urlencoded({extended:true}),
+    bodyParser.json()
+);
+
+export const addNewTask = async task=>{
+    let db = await connectDB();
+    let collection = db.collection(`tasks`);
+    await collection.insertOne(task);
+}
+
+app.post('/task/new', async (req,res)=>{
+    let task = req.body.task;
+    await addNewTask(task);
+    res.status(200).send();
+})
+```
+src/server/server.spec.js
+```
+import { addNewTask } from './server';
+
+addNewTask({
+    name:"My Task",
+    id:"12345"
+});
+```
+package.json
+```
+    "server-test":"babel-node src/server/server.spec"
+```
+command line
+```
+npm run server-test
+```
+should have no errors and robo 3T should show task written.
+
+## server part 3 - updateTask
+
+src/server/server.js
+```
+export const updateTask = async task=>{
+    console.debug('updateTask ', task);
+    let { id, group, isComplete, name} = task;
+    let db = await connectDB();
+    let collection = db.collection(`tasks`);
+    if (group) {
+        await collection.updateOne({id}, {$set:{group}});
+    }
+    if (name) {
+        console.debug('update name');
+        await collection.updateOne({id}, {$set:{name}});
+    }
+    if (isComplete !== undefined) {
+        await collection.updateOne({id}, {$set:{isComplete}});
+    }
+}
+
+app.post('/task/update', async (req,res)=>{
+    let task = req.body.task;
+    await updateTask(task);
+    res.status(200).send();
+});
+```
+
+src/server/server.spec.js
+
+```
+import { addNewTask, updateTask } from './server';
+
+(async function myTest(){
+    await addNewTask({
+        name:"My Task",
+        id:"12345"
+    });
+    await updateTask({
+        name:"My Task - UPDATED",
+        id:"12345"
+    });
+})();
+```
+NB: note myTest is an iife Immediately Invoked Function Expression.
+Now when you run the test, mongo will show the task updated.
+Cool.
+
+## join up server and ui
+```
+npm i --save-dev concurrently@4.0.1
+```
+
+package.json
+```
+    "start-dev": "concurrently \"npm run server\" \"npm run dev\"" 
+```
+
+now run both concurrently:
+```
+npm run start-dev
+```
+
+### axios for http
+```
+npm i --save axios@0.18.0
+```
+Next update sagas to use http calls rather than mock sagas.
+
+src/app/store/index.js
+```
+//import * as sagas from './sagas.mock';
+import * as sagas from './sagas';
+```
+
+src/app/store/sagas.js
+```
+import { take, put, select } from 'redux-saga/effects';
+import * as mutations from './mutations'; // with dot slash means find .js file in same directory
+import uuid from 'uuid'; // without dot looks for an npm module called uuid
+import axios from 'axios';
+
+const url = "http://localhost:7777";
+
+/**
+ * Reducers cannot have any randomness (they must be deterministic)
+ * Since the action of creating a task involves generating a random ID, it is not pure.
+ * When the response to an action is not deterministic in a Redux application, both Sagas and Thunks are appropriate.
+ */
+export function* taskCreationSaga(){
+    while (true){
+        
+        const {groupID} = yield take(mutations.REQUEST_TASK_CREATION);
+        console.log("saga running groupID:", groupID);
+        const ownerID = `U1`;
+        // const ownerID = yield select(state=>state.session.id);
+        const taskID = uuid();
+        yield put(mutations.createTask(taskID, groupID, ownerID));
+        const { res } = yield axios.post(url + `/task/new/`,{
+            task:{
+                id:taskID,
+                group: groupID,
+                owner: ownerID,
+                isComplete: false,
+                name: "New task"
+            }
+        });
+        console.info("Got response,", res);
+    }
+}
+```
+
+Now when you hit button 'Add New', in inspect you see 
+'Got response, undefined'
+in Robo 3T you can see a new task record created.
+
+src/app/store/sagas.js
+```
+export function* taskModificationSaga() {
+    while (true){
+        const task = yield take([
+            mutations.SET_TASK_GROUP,
+            mutations.SET_TASK_NAME,
+            mutations.SET_TASK_COMPLETE
+        ]);
+        axios.post(url + `/task/update`,{
+            task:{
+                id: task.taskID,
+                group: task.groupID,
+                name: task.name,
+                isComplete: task.isComplete
+            }
+        });
+    }
+}
+```
+
+This is picked up automatically due to
+src/app/store/index.js
+```
+import * as sagas from './sagas';
+```
+
+Now updates are also written to db. Nice.
 

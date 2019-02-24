@@ -13,7 +13,7 @@ export const store = createStore(
     //     return state;
     // },
     combineReducers({
-        session(session = defaultState.session){
+        session(session = defaultState.session || {}){
             return session;
         },
         tasks(tasks = defaultState.tasks, action){

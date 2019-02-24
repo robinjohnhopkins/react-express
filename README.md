@@ -1114,3 +1114,119 @@ export const Main = ()=>(
 ```
 
 So now we have the start of a login component.
+
+## login continued
+
+```
+npm i --save md5
+```
+src/server/initialize-db.js
+```
+async function initializeDB(){
+    let db = await connectDB();
+    let user = await db.collection(`users`).findOne({id:"U1"});
+    if (!user){
+        for (let collectionName in defaultState){
+            let collection = db.collection(collectionName);
+            await collection.insertMany(defaultState[collectionName]);
+        }    
+    }
+}
+```
+
+src/server/server.js
+```
+import './initialize-db';
+```
+
+src/server/defaultState.js
+```
+import md5 from 'md5';
+export const defaultState = {
+    // session:{
+    //     authenticated:false
+    // },
+    users:[{
+        id:"U1",
+        name:"Dev",
+        passwordHash:md5("TUPLES"),
+        friends:[`U2`]
+    },{
+        id:"U2",
+        name:"C. Eeyo",
+        passwordHash:md5("PROFITING"),
+        friends:[]
+    }],
+```
+
+src/app/store/index.js
+```
+    combineReducers({
+        session(session = defaultState.session || {}){
+            return session;
+        },
+```
+src/app/components/Login.jsx
+```
+const LoginComponent = ()=>{  // <-- this curly bracket indicates returning a function rather than an object 
+    return <div>
+        <h2>
+            Please login
+        </h2>
+        <form>
+            <input type="text" placeholder="username" name="username"
+                defaultValue="Dev"/>
+            <input type="password" placeholder="password" name="password"
+                defaultValue=""/>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+}
+```
+
+So we have a login form with username, password and submit button.
+If you drop mongo db in Robo 3T.
+Then ```npm run start-dev```
+the db will be re-created and the two users records
+will have password hashes.
+
+src/app/store/mutations.js
+```
+export const REQUEST_AUTHENTICATE_USER = `REQUEST_AUTHENTICATE_USER`;
+export const requestAuthenticateUser = (username, password)=>({
+    type:REQUEST_AUTHENTICATE_USER
+});
+```
+
+Login.jsx
+```
+import React from 'react';
+import { connect } from 'react-redux';
+import * as mutations from '../store/mutations';
+
+const LoginComponent = ({authenticateUser})=>{  // <-- this curly bracket indicates returning a function rather than an object 
+    return <div>
+        <h2>
+            Please login
+        </h2>
+        <form onSubmit={authenticateUser}>
+            <input type="text" placeholder="username" name="username"
+                defaultValue="Dev"/>
+            <input type="password" placeholder="password" name="password"
+                defaultValue=""/>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+}
+const mapStateToProps = state=>state;
+const mapDispatchToProps = (dispatch)=>({
+    authenticateUser(e){
+        e.preventDefault();
+        let username = e.target[`username`].value;
+        let password = e.target[`password`].value;
+        dispatch(mutations.requestAuthenticateUser(username, password));
+    }
+});
+export const ConnectedLogin = connect(mapStateToProps, mapDispatchToProps)(LoginComponent);
+```
+Now Login form dispatches REQUEST_AUTHENTICATE_USER action.

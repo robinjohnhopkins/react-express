@@ -4,6 +4,7 @@ export const SET_TASK_NAME = `SET_TASK_NAME`;
 export const ADD_TASK_COMMENT = `ADD_TASK_COMMENT`;
 export const REQUEST_TASK_CREATION = `REQUEST_TASK_CREATION`;
 export const CREATE_TASK = `CREATE_TASK`;
+export const REQUEST_AUTHENTICATE_USER = `REQUEST_AUTHENTICATE_USER`;
 
 export const setTaskCompletion = (id, isComplete = true)=>({
     type:SET_TASK_COMPLETE,
@@ -39,4 +40,8 @@ export const setTaskName = (taskID, name)=>({
     type:SET_TASK_NAME,
     taskID,
     name
+});
+
+export const requestAuthenticateUser = (username, password)=>({
+    type:REQUEST_AUTHENTICATE_USER
 });

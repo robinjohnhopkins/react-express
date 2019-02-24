@@ -1026,3 +1026,91 @@ import * as sagas from './sagas';
 
 Now updates are also written to db. Nice.
 
+src/app/components/Main.jsx
+```
+const RouteGuard = Component => ({match})=>{
+    console.info("RouteGuard", match);
+    return <Component match={match} />
+}
+
+export const Main = ()=>(
+    <Router history={history}>
+        <Provider store={store}>
+            <div>
+                <ConnectedNavigation />
+                {/*Dashboard goes here!*/}
+                {/* <ConnectDashboard/> */}
+                {/* <Route exact path="/dashboard" render={()=> (<ConnectDashboard/>)} /> */}
+                {/* <Route exact path="/task/:id" render={({match})=> (<ConnectedTaskDetail match={match} />)} /> */}
+                <Route exact path="/dashboard" render={RouteGuard(ConnectDashboard)} />
+                <Route exact path="/task/:id" render={RouteGuard(ConnectedTaskDetail)} />
+```
+
+Now we can see our RouteGuard is a middleware function pre-cursor to route processing.
+
+```
+npm i --save react-router
+```
+
+src/server/defaultState.js
+```
+export const defaultState = {
+    session:{
+        authenticated:false
+    },
+```
+src/app/store/index.js
+```
+export const store = createStore(
+    // function reducer(state = defaultState, action){
+    //     return state;
+    // },
+    combineReducers({
+        session(session = defaultState.session){
+            return session;
+        },
+        tasks(tasks = defaultState.tasks, action){
+            . . .
+```
+
+Main.jsx
+```
+import {Redirect} from 'react-router';
+
+const RouteGuard = Component => ({match})=>{
+    console.info("RouteGuard", match);
+    if (!store.getState().session.authenticated){
+        // reroute
+        return <Redirect to="/" />;
+    }
+    return <Component match={match} />
+}
+```
+
+So now pages are rerouted to '/'.
+
+src/app/components/Login.jsx
+```
+import React from 'react';
+import { connect } from 'react-redux'
+
+const LoginComponent = ()=>{  // <-- this curly bracket indicates returning a function rather than an object 
+    return <div>Login here!</div>
+}
+const mapStateToProps = state=>state;
+export const ConnectedLogin = connect(mapStateToProps)(LoginComponent);
+```
+
+src/app/components/Main.jsx
+```
+import {ConnectedLogin} from './Login'
+. . .
+export const Main = ()=>(
+    <Router history={history}>
+        <Provider store={store}>
+            <div>
+                <ConnectedNavigation />
+                <Route exact path="/" component={ConnectedLogin}/>
+```
+
+So now we have the start of a login component.

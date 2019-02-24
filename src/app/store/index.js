@@ -8,12 +8,14 @@ const sagaMiddleware = createSagaMiddleware();
 import * as sagas from './sagas';
 import * as mutations from './mutations';
 
-
 export const store = createStore(
     // function reducer(state = defaultState, action){
     //     return state;
     // },
     combineReducers({
+        session(session = defaultState.session){
+            return session;
+        },
         tasks(tasks = defaultState.tasks, action){
             switch(action.type){
                 case mutations.CREATE_TASK:

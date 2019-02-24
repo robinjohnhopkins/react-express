@@ -1230,3 +1230,76 @@ const mapDispatchToProps = (dispatch)=>({
 export const ConnectedLogin = connect(mapStateToProps, mapDispatchToProps)(LoginComponent);
 ```
 Now Login form dispatches REQUEST_AUTHENTICATE_USER action.
+
+src/app/store/sagas.js
+```
+export function* userAuthenticationSaga(){
+    while (true) {
+        const {username, password} = yield take(mutations.REQUEST_AUTHENTICATE_USER);
+        try{
+            const {data} = axios.post(url + `/authenticate`, {username, password});
+            if (!data){
+                throw new Error();
+            }
+        } catch (e) {
+            console.log("can't authenticate");
+            yield put(mutations.processAuthenticateUser(mutations.NOT_AUTHENTICATED));
+        }
+    }
+}
+```
+
+src/app/store/mutations.js
+```
+export const PROCESSING_AUTHENTICATE_USER = `PROCESSING_AUTHENTICATE_USER`;
+export const NOT_AUTHENTICATED = `NOT_AUTHENTICATED`;
+export const AUTHENTICATED = `AUTHENTICATED`;
+export const AUTHENTICATING = `AUTHENTICATING`;
+
+export const processAuthenticateUser = (status= AUTHENTICATING, session=null )=>({
+    type:PROCESSING_AUTHENTICATE_USER,
+    session,authenticated: status
+});
+```
+
+src/app/store/index.js
+```
+    combineReducers({
+        session(userSession = defaultState.session || {}, action){
+            let {type, authenticated, session} = action;
+            switch(type){
+                case mutations.REQUEST_AUTHENTICATE_USER:
+                    return {...userSession, authenticated:mutations.AUTHENTICATING};
+                case mutations.PROCESSING_AUTHENTICATE_USER:
+                    return {...userSession, authenticated};
+                default:
+                    return userSession;
+            }
+        },
+```
+
+src/app/components/Login.jsx
+```
+const LoginComponent = ({authenticateUser, authenticated})=>{  // <-- this curly bracket indicates returning a function rather than an object 
+    return <div>
+        <h2>
+            Please login
+        </h2>
+        <form onSubmit={authenticateUser}>
+            <input type="text" placeholder="username" name="username"
+                defaultValue="Dev"/>
+            <input type="password" placeholder="password" name="password"
+                defaultValue=""/>
+            {authenticated === mutations.NOT_AUTHENTICATED ? <p> Login incorrect</p> : null }
+            <button type="submit">Login</button>
+        </form>
+    </div>
+}
+//const mapStateToProps = state=>state;
+const mapStateToProps = ({session})=>({
+    authenticated: session.authenticated
+});
+```
+
+Now front end has authentication functionality but server needs to authenticate.
+

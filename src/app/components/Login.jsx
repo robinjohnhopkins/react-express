@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import * as mutations from '../store/mutations';
 
-const LoginComponent = ({authenticateUser})=>{  // <-- this curly bracket indicates returning a function rather than an object 
+const LoginComponent = ({authenticateUser, authenticated})=>{  // <-- this curly bracket indicates returning a function rather than an object 
     return <div>
         <h2>
             Please login
@@ -12,11 +12,15 @@ const LoginComponent = ({authenticateUser})=>{  // <-- this curly bracket indica
                 defaultValue="Dev"/>
             <input type="password" placeholder="password" name="password"
                 defaultValue=""/>
+            {authenticated === mutations.NOT_AUTHENTICATED ? <p> Login incorrect</p> : null }
             <button type="submit">Login</button>
         </form>
     </div>
 }
-const mapStateToProps = state=>state;
+//const mapStateToProps = state=>state;
+const mapStateToProps = ({session})=>({
+    authenticated: session.authenticated
+});
 const mapDispatchToProps = (dispatch)=>({
     authenticateUser(e){
         e.preventDefault();

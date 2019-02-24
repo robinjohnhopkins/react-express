@@ -1194,7 +1194,9 @@ src/app/store/mutations.js
 ```
 export const REQUEST_AUTHENTICATE_USER = `REQUEST_AUTHENTICATE_USER`;
 export const requestAuthenticateUser = (username, password)=>({
-    type:REQUEST_AUTHENTICATE_USER
+    type:REQUEST_AUTHENTICATE_USER,
+    username,
+    password
 });
 ```
 
@@ -1237,7 +1239,7 @@ export function* userAuthenticationSaga(){
     while (true) {
         const {username, password} = yield take(mutations.REQUEST_AUTHENTICATE_USER);
         try{
-            const {data} = axios.post(url + `/authenticate`, {username, password});
+            const {data} = yield axios.post(url + `/authenticate`, {username, password});
             if (!data){
                 throw new Error();
             }
@@ -1303,3 +1305,124 @@ const mapStateToProps = ({session})=>({
 
 Now front end has authentication functionality but server needs to authenticate.
 
+src/server/server.js
+```
+import {authenticationRoute} from './authenticate';
+. . .
+app.use(
+    cors(),
+    bodyParser.urlencoded({extended:true}),
+    bodyParser.json()
+);
+
+authenticationRoute(app);
+```
+
+src/server/authenticate.js
+```
+import {connectDB} from './connect-db';
+import uuid from 'uuid';
+import md5 from 'md5';
+
+const authenticationTokens = [];
+
+async function assembleUserState(user){
+    let db = await connectDB();
+
+    let tasks = await db.collection(`tasks`).find({owner:user.id}).toArray();
+    let groups = await db.collection(`groups`).find({owner:user.id}).toArray();
+    return {
+        tasks,
+        groups,
+        session:{authenticated:`AUTHENTICATED`,id:user.id}
+    }
+}
+export const authenticationRoute = app => {
+    app.post('/authenticate', async (req, res) => {
+        //console.info("server /authenticate route", req.body);
+        let {username, password} = req.body;
+        let db = await connectDB();
+        let collection = db.collection(`users`);
+        let user = await collection.findOne({name:username});
+        if (!user){
+
+            return res.status(500).send("User not found");
+        }
+        let hash = md5(password);
+        let passwordCorrect = hash === user.passwordHash;
+
+        if (!passwordCorrect){
+            return res.status(500).send("Password incorrect");
+        }
+        let token = uuid();
+        authenticationTokens.push({
+            token,
+            userID: user.id
+        });
+        let state=await assembleUserState(user);
+        res.send({token,state});
+    })
+}
+```
+
+restart server and ui for server change to take effect.
+
+Now user: Dev pw:TUPLES results in server 
+passing back correct token:
+
+authenticated {token: "50945233-21c7-4fa3-9c9d-732a72cf8c12", state: {…}}state: {tasks: Array(4), groups: Array(3), session: {…}}token: "50945233-21c7-4fa3-9c9d-732a72cf8c12"
+
+src/app/store/mutations.js
+```
+export const SET_STATE = `SET_STATE`;
+export const setState = (state = {} )=>({
+    type:SET_STATE,
+    state
+});
+```
+
+src/app/store/index.js
+```
+    combineReducers({
+        session(userSession = defaultState.session || {}, action){
+            let {type, authenticated, session} = action;
+            switch(type){
+                case mutations.SET_STATE:
+                    return {...userSession, id:action.state.session.id};
+ . . .
+        tasks(tasks = [], action){
+            switch(action.type){
+                case mutations.SET_STATE:
+                    return action.state.tasks;
+. . .
+        comments(comments = []){
+            return comments;
+        },
+        groups(groups = [], action){
+            switch(action.type){
+                case mutations.SET_STATE:
+                    return action.state.groups;
+            }
+            return groups;
+        },
+        users(users = []){
+            return users;
+```
+Now when a correct username + password are entered
+then state is correctly set. So now we just have to redirect to nother page.
+
+```
+{session: {…}, tasks: Array(4), comments: Array(0), groups: Array(3), users: Array(0)}
+comments: []
+groups: (3) [{…}, {…}, {…}]
+session: {authenticated: "AUTHENTICATING", id: "U1"}
+tasks: Array(4)
+0: {_id: "5c72ba33189dce6fed2104b4", name: "Refactor tests", id: "T1", group: "G1", owner: "U1", …}
+1: {_id: "5c72ba33189dce6fed2104b5", name: "Meet with CTO", id: "T2", group: "G1", owner: "U1", …}
+2: {_id: "5c72ba33189dce6fed2104b7", name: "Update component snapshots", id: "T4", group: "G2", owner: "U1", …}
+3: {_id: "5c72ba33189dce6fed2104b8", name: "Production optimizations", id: "T5", group: "G3", owner: "U1", …}
+length: 4
+__proto__: Array(0)
+users: Array(0)
+length: 0
+```

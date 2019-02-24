@@ -9,6 +9,7 @@ export const PROCESSING_AUTHENTICATE_USER = `PROCESSING_AUTHENTICATE_USER`;
 export const NOT_AUTHENTICATED = `NOT_AUTHENTICATED`;
 export const AUTHENTICATED = `AUTHENTICATED`;
 export const AUTHENTICATING = `AUTHENTICATING`;
+export const SET_STATE = `SET_STATE`;
 
 export const setTaskCompletion = (id, isComplete = true)=>({
     type:SET_TASK_COMPLETE,
@@ -47,9 +48,16 @@ export const setTaskName = (taskID, name)=>({
 });
 
 export const requestAuthenticateUser = (username, password)=>({
-    type:REQUEST_AUTHENTICATE_USER
+    type:REQUEST_AUTHENTICATE_USER,
+    username,
+    password
 });
 export const processAuthenticateUser = (status= AUTHENTICATING, session=null )=>({
     type:PROCESSING_AUTHENTICATE_USER,
-    session,authenticated: status
+    session,
+    authenticated: status
+});
+export const setState = (state = {} )=>({
+    type:SET_STATE,
+    state
 });

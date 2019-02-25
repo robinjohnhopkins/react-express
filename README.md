@@ -1506,3 +1506,7 @@ npm run build
 
 heroku login
 
+heroku git:remote -a react-express-app-<number>
+git push heroku master
+
+

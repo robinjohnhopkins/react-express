@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build":"webpack -p",
+    "build": "webpack -p",
     "test": "echo \"Error: no test specified\" && exit 1",
     "old-start": "webpack",
     "start": "npm run server",
@@ -24,18 +24,18 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.0.0",
     "babel-loader": "^8.0.2",
-    "body-parser": "^1.18.3",
     "concurrently": "^4.0.1",
-    "cors": "^2.8.4",
-    "express": "^4.16.3",
-    "mongodb": "^3.1.10",
-    "webpack": "^4.17.2",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.7"
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.4",
+    "express": "^4.16.3",
+    "history": "^4.7.2",
     "md5": "^2.2.1",
+    "mongodb": "^3.1.10",
     "react": "^16.4.2",
     "react-dom": "^16.5.0",
     "react-redux": "^5.0.7",
@@ -44,6 +44,7 @@
     "redux": "^4.0.0",
     "redux-logger": "^3.0.6",
     "redux-saga": "^0.16.2",
+    "webpack": "^4.17.2",
     "uuid": "^3.3.2"
   }
 }

@@ -67,7 +67,7 @@ const TaskDetail = ({
                 ))}
             </div> */}
 
-            <form className="form-inline">
+            <form className="form-inline mt-3">
                 <span className="mr-4">
                     Change Group
                 </span>

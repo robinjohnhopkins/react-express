@@ -1512,3 +1512,22 @@ git push heroku master
 At this point I had a few issues getting the deployment working in Heroku - but it mainly boiled down to some things being dev dependencies where they needed to be dependencies.
 esp. ./node_modules//.bin/babel-node
 which did not appear in ./node_modules//.bin/ folder until it was non dev dependency.
+
+## Bootstrap
+
+https://www.bootstrapcdn.com/
+
+Complete css, html
+
+index.html
+```
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+. . .
+<body class="container">
+```
+add bootstrap css and move body a bit to right.
+
+Also, check out src/app/components/Dashboard.jsx
+Login.jsx, TaskDetail.jsx, TaskList.jsx
+for other bootstrap styling.

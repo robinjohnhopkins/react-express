@@ -1503,10 +1503,12 @@ run build to create dist/bundle.js
 ```
 npm run build
 ```
-
+```
 heroku login
-
 heroku git:remote -a react-express-app-<number>
 git push heroku master
+```
 
-
+At this point I had a few issues getting the deployment working in Heroku - but it mainly boiled down to some things being dev dependencies where they needed to be dependencies.
+esp. ./node_modules//.bin/babel-node
+which did not appear in ./node_modules//.bin/ folder until it was non dev dependency.

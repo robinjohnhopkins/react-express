@@ -20,17 +20,17 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "concurrently": "^4.0.1",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.7"
+  },
+  "dependencies": {
     "@babel/core": "^7.0.0",
     "@babel/node": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.0.0",
     "babel-loader": "^8.0.2",
-    "concurrently": "^4.0.1",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.7"
-  },
-  "dependencies": {
     "axios": "^0.18.0",
     "body-parser": "^1.18.3",
     "cors": "^2.8.4",

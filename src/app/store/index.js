@@ -13,7 +13,7 @@ export const store = createStore(
     //     return state;
     // },
     combineReducers({
-        session(userSession = defaultState.session || {}, action){
+        session(userSession = defaultState.session, action){
             let {type, authenticated, session} = action;
             switch(type){
                 case mutations.SET_STATE:
@@ -70,9 +70,13 @@ export const store = createStore(
             }
             return groups;
         },
-        users(users = []){
+        users:(users = defaultState.users,action)=>{
+            switch (action.type) {
+                case mutations.SET_STATE:
+                    return action.state.users;
+            }
             return users;
-        }
+        },
     }),
     applyMiddleware(createLogger(), sagaMiddleware)
 );

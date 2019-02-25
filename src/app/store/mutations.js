@@ -52,12 +52,29 @@ export const requestAuthenticateUser = (username, password)=>({
     username,
     password
 });
-export const processAuthenticateUser = (status= AUTHENTICATING, session=null )=>({
-    type:PROCESSING_AUTHENTICATE_USER,
-    session,
-    authenticated: status
-});
-export const setState = (state = {} )=>({
-    type:SET_STATE,
-    state
-});
+// export const processAuthenticateUser = (status= AUTHENTICATING, session=null )=>({
+//     type:PROCESSING_AUTHENTICATE_USER,
+//     session,
+//     authenticated: status
+// });
+export const processAuthenticateUser = (status= AUTHENTICATING, session=null )=>{
+    console.log("processAuthenticateUser function");
+    let state={
+        type:PROCESSING_AUTHENTICATE_USER,
+        session,
+        authenticated: status
+    };
+    return state;
+};
+// export const setState = (state = {} )=>({
+//     type:SET_STATE,
+//     state
+// });
+export const setState = (state = {} )=>{
+    console.log("setState", state);
+    let stateObject = {
+        type:SET_STATE,
+        state
+    };
+    return stateObject;
+};

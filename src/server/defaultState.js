@@ -1,8 +1,8 @@
 import md5 from 'md5';
 export const defaultState = {
-    // session:{
+    session:{
     //     authenticated:false
-    // },
+    },
     users:[{
         id:"U1",
         name:"Dev",

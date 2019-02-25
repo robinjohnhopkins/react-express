@@ -1,16 +1,28 @@
 import React from 'react';
 import { connect } from 'react-redux'
-import { ConnectTaskList } from './TaskList'
+import * as mutations from '../store/mutations';
 import {Link} from 'react-router-dom'
+import { ConnectedUsernameDisplay } from './UsernameDisplay';
 
-const Navigation = () =>(
+const Navigation = ({id, authenticated}) =>(
     <div>
         <Link to="/dashboard">
             <h1>
-                My Application
+                Task Application
             </h1>
         </Link>
+        { authenticated ?
+        <h4>
+            Welcome, <ConnectedUsernameDisplay id={id} />
+        </h4>
+        : null
+        }
     </div>
 );
 
-export const ConnectedNavigation = connect(state => state)(Navigation);
+const mapStateToProps = ({session})=>({
+    id:session.id,
+    authenticated:session.authenticated == mutations.AUTHENTICATED
+});
+
+export const ConnectedNavigation = connect(mapStateToProps)(Navigation);

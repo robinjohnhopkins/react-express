@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import * as mutations from '../store/mutations'
 
-//import { ConnectedUsernameDisplay } from './UsernameDisplay'
+import { ConnectedUsernameDisplay } from './UsernameDisplay'
 
 import {
     setTaskCompletion,
@@ -100,7 +100,7 @@ function mapStateToProps(state,ownProps){
     let id = ownProps.match.params.id;
     let task = state.tasks.find(task=>task.id === id);
     let comments = state.comments.filter(comment=>comment.task === id);
-    let isOwner = true; //state.session.id === task.owner;
+    let isOwner = state.session.id === task.owner;
     let groups = state.groups;
 
     return {
@@ -108,8 +108,8 @@ function mapStateToProps(state,ownProps){
         task,
         comments,
         isOwner,
-        sessionID: null, //state.session.id,
-        isComplete: false, //task.isComplete,
+        sessionID: state.session.id,
+        isComplete: task.isComplete,
         groups
     }
 }

@@ -9,11 +9,19 @@ async function assembleUserState(user){
 
     let tasks = await db.collection(`tasks`).find({owner:user.id}).toArray();
     let groups = await db.collection(`groups`).find({owner:user.id}).toArray();
-    return {
+    let users = [
+        await db.collection(`users`).findOne({id:user.id}),
+        ...await db.collection(`users`).find({id:{$in:[...tasks].map(x=>x.owner)}}).toArray()
+    ];
+
+    let userState = {
         tasks,
         groups,
-        session:{authenticated:`AUTHENTICATED`,id:user.id}
-    }
+        users,
+        session:{authenticated:`AUTHENTICATED`,id:user.id, name:user.name}
+    };
+    console.log("userState", userState);
+    return userState;
 }
 export const authenticationRoute = app => {
     app.post('/authenticate', async (req, res) => {
@@ -23,7 +31,6 @@ export const authenticationRoute = app => {
         let collection = db.collection(`users`);
         let user = await collection.findOne({name:username});
         if (!user){
-
             return res.status(500).send("User not found");
         }
         let hash = md5(password);

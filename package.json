@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack -p",
+    "deploy": "npm run build && git commit -a -m deployment && git push heroku master",
     "test": "echo \"Error: no test specified\" && exit 1",
     "old-start": "webpack",
     "start": "npm run build && npm run list-server && npm run server",

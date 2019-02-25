@@ -1426,3 +1426,32 @@ __proto__: Array(0)
 users: Array(0)
 length: 0
 ```
+
+src/app/store/sagas.js
+```
+import {history} from './history';
+. . . 
+export function* userAuthenticationSaga(){
+    while (true) {
+        const {username, password} = yield take(mutations.REQUEST_AUTHENTICATE_USER);
+        console.log("userAuthenticationSaga {username, password}=", {username, password});
+        try{
+            const {data} = yield axios.post(url + `/authenticate`, {username, password});
+            if (!data){
+                throw new Error();
+            }
+            console.log("authenticated", data);
+            yield put(mutations.setState(data.state));
+            yield put(mutations.processAuthenticateUser(mutations.AUTHENTICATED));
+
+            history.push('/dashboard');
+            
+        } catch (e) {
+            console.log("can't authenticate");
+            yield put(mutations.processAuthenticateUser(mutations.NOT_AUTHENTICATED));
+        }
+    }
+}
+```
+
+Now the app is authenticated, routes to thedashboard on correct user/password and the tasks persist.

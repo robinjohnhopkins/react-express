@@ -2,6 +2,7 @@ import { take, put, select } from 'redux-saga/effects';
 import * as mutations from './mutations'; // with dot slash means find .js file in same directory
 import uuid from 'uuid'; // without dot looks for an npm module called uuid
 import axios from 'axios';
+import {history} from './history';
 
 const url = "http://localhost:7777";
 
@@ -61,6 +62,10 @@ export function* userAuthenticationSaga(){
             }
             console.log("authenticated", data);
             yield put(mutations.setState(data.state));
+            yield put(mutations.processAuthenticateUser(mutations.AUTHENTICATED));
+
+            history.push('/dashboard');
+            
         } catch (e) {
             console.log("can't authenticate");
             yield put(mutations.processAuthenticateUser(mutations.NOT_AUTHENTICATED));

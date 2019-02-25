@@ -1455,3 +1455,54 @@ export function* userAuthenticationSaga(){
 ```
 
 Now the app is authenticated, routes to thedashboard on correct user/password and the tasks persist.
+
+## Heroku
+Install heroku CLI.
+
+create new app 'react-express-app-<ultimate.number.+1>
+Resources tab, Add ons, mongo - mLab MongoDB. Need card - remember to remove!
+
+.gitignore
+ensure dist is not present
+
+package.json
+```
+  "scripts": {
+    "build":"webpack -p",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "old-start": "webpack",
+    "start": "npm run server",
+```
+
+src/app/store/sagas.js
+```
+const url = process.env.NODE_ENV == `production` ? `` : "http://localhost:7777";
+```
+
+src/server/connect-db.js
+```
+const url = process.env.MONGODB_URI || `mongodb://localhost:27017/myorganiser`;
+```
+
+src/server/server.js
+```
+import path from 'path';
+
+let port = process.env.PORT || 7777;
+. . . 
+// This allows us to not use webpack server in production
+if (process.env.NODE_ENV == `production`) {
+    app.use(express.static(path.resolve(__dirname,'../../dist')));
+    app.get('/*',(req,res)=>{
+        res.sendFile(path.resolve('index.html'));
+    });
+}
+```
+
+run build to create dist/bundle.js
+```
+npm run build
+```
+
+heroku login
+

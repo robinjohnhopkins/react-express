@@ -7,10 +7,10 @@
     "build": "webpack -p",
     "test": "echo \"Error: no test specified\" && exit 1",
     "old-start": "webpack",
-    "start": "npm run server",
+    "start": "npm run build && npm run server",
     "dev": "webpack-dev-server --open",
     "initialize": "babel-node src/server/initialize-db",
-    "server": "babel-node src/server/server",
+    "server": "cross-env NODE_ENV=production babel-node src/server/server",
     "server-test": "babel-node src/server/server.spec",
     "start-dev": "concurrently \"npm run server\" \"npm run dev\""
   },

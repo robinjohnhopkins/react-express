@@ -23,6 +23,23 @@ app.use(
 
 authenticationRoute(app);
 
+app.get('/stats', async (req,res)=>{
+    let stats = [{
+        name:"robin",
+        score: 23
+    },
+    {
+        name:"fred",
+        score: 33
+    },
+    {
+        name:"mark",
+        score: 11
+    },
+    ];
+    res.status(200).send(stats);
+});
+
 // This allows us to not use webpack server in production
 if (process.env.NODE_ENV == `production`) {
     app.use(express.static(path.resolve(__dirname,'../../dist')));

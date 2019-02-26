@@ -12,10 +12,17 @@ const Navigation = ({id, authenticated}) =>(
             </h1>
         </Link>
         { authenticated ?
-        <h4>
-            Welcome, <ConnectedUsernameDisplay id={id} />
-        </h4>
-        : null
+            <div>
+                <h4>
+                    Welcome, <ConnectedUsernameDisplay id={id} />
+                </h4>
+                <Link to="/stats">
+                    <h4>
+                        Statistics
+                    </h4>
+                </Link>
+            </div>
+            : null
         }
     </div>
 );

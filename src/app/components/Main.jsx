@@ -8,6 +8,7 @@ import {history } from '../store/history'
 import { ConnectedNavigation } from './Navigation'
 import { ConnectedTaskDetail } from './TaskDetail'
 import {Redirect} from 'react-router';
+import StatList from './StatList';
 
 const RouteGuard = Component => ({match})=>{
     console.info("RouteGuard", match);
@@ -24,6 +25,7 @@ export const Main = ()=>(
             <div>
                 <ConnectedNavigation />
                 <Route exact path="/" component={ConnectedLogin}/>
+                <Route exact path="/stats" render={RouteGuard(StatList)}/>
                 {/*Dashboard goes here!*/}
                 {/* <ConnectDashboard/> */}
                 {/* <Route exact path="/dashboard" render={()=> (<ConnectDashboard/>)} /> */}

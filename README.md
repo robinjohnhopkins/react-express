@@ -1531,3 +1531,8 @@ add bootstrap css and move body a bit to right.
 Also, check out src/app/components/Dashboard.jsx
 Login.jsx, TaskDetail.jsx, TaskList.jsx
 for other bootstrap styling.
+
+## graph
+```
+npm install victory --save
+```

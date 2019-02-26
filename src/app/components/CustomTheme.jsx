@@ -52,18 +52,13 @@ var range = function(start, end, step) {
     } else {
         throw TypeError("Only string and number types are supported");
     }
-
     return range;
-
 }
-
 
 export default class CustomTheme extends React.Component {
 
     constructor(props) {
       super(props);
-      console.log(random(1,5));
-
       this.state = {
         data: this.getScatterData()
       }
@@ -81,11 +76,9 @@ export default class CustomTheme extends React.Component {
   
     render() {
       return (
-        <div>
-            <h5>Zoom in/out scatter graph</h5>
-        {/* <VictoryBar/> */}
+
         <VictoryChart
-          domain={{y: [0, 100]}}
+          domain={{y: [0, 100]}} style={{ parent: { maxWidth: "50%" } }}responsive={false}
           containerComponent={<VictoryZoomContainer zoomDomain={{x: [5, 35], y: [0, 100]}}/>}
         >
           <VictoryScatter
@@ -98,19 +91,18 @@ export default class CustomTheme extends React.Component {
             }}
           />
           <VictoryLegend x={125} y={50}
-  	title="Legend"
-    centerTitle
-    orientation="horizontal"
-    gutter={20}
-    style={{ border: { stroke: "black" }, title: {fontSize: 20 } }}
-    data={[
-      { name: "One", symbol: { fill: "tomato", type: "star" } },
-      { name: "Two", symbol: { fill: "orange" } },
-      { name: "Three", symbol: { fill: "gold" } }
-    ]}
-  />
+                title="Zoom in/out scatter graph"
+                centerTitle
+                orientation="horizontal"
+                gutter={20}
+                style={{ border: { stroke: "black" }, title: {fontSize: 8 } }}
+                data={[
+                { name: "One", symbol: { fill: "tomato", type: "star" } },
+                { name: "Two", symbol: { fill: "orange" } },
+                { name: "Three", symbol: { fill: "gold" } }
+                ]}
+            />
           </VictoryChart>
-        </div>
       );
     }
   }

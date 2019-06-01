@@ -444,6 +444,23 @@ for (let saga in sagas){
     sagaMiddleware.run(sagas[saga]);
 }
 ```
+
+src/app/components/TaskList.jsx
+
+```
+import { requestTaskCreation } from '../store/mutations'
+...
+const mapDispatchToProps = (dispatch, ownProps)=>{
+    return {
+        createNewTask(id) {
+            console.log("creating new task ...", id);
+            dispatch(requestTaskCreation(id));              // <<<<<
+        }
+    }
+}
+export const ConnectTaskList = connect(mapStateToProps, mapDispatchToProps)(TaskList);
+```
+
 now in saga CREATE_TASK has been dispatched.
 
 sagas.mock.js

@@ -1553,3 +1553,43 @@ for other bootstrap styling.
 ```
 npm install victory --save
 ```
+
+## debug local run server in vscode
+
+.vscode/launch.json
+```
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/src/server/server.js",
+            "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/babel-node",
+            "runtimeArgs": ["--nolazy"]
+        }
+    ]
+}
+```
+
+
+.bablerc
+```
+{
+    "presets":[
+        ["@babel/preset-env",{
+            "targets":{
+                "node":"current"
+            }
+        }],
+        "@babel/preset-react"
+    ],
+    "sourceMaps": "inline",
+    "retainLines": true
+}
+```
+

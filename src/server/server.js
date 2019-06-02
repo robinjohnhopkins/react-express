@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import {connectDB} from './connect-db';
-import './initialize-db';
+//import './initialize-db'; // if you import this it populates db with samples but duplicates if run multiple times!
+// to sort drop db in robomongo and rerun with this imported.
 import {authenticationRoute} from './authenticate';
 import path from 'path';
 
